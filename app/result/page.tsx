@@ -1,7 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { generateAudit } from "@/lib/auditEngine";
+import { supabase } from "@/lib/supabase";
+
+import jsPDF from "jspdf";
+
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function ResultPage() {
 
@@ -12,10 +25,11 @@ export default function ResultPage() {
   const [teamSize, setTeamSize] = useState("");
   const [useCase, setUseCase] = useState("");
 
-  // Lead Capture States
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [role, setRole] = useState("");
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
 
@@ -42,11 +56,156 @@ export default function ResultPage() {
     Number(teamSize)
   );
 
+  const chartData = [
+    {
+      name: "Current",
+      amount: currentSpend,
+    },
+    {
+      name: "Recommended",
+      amount: audit.recommendedSpend,
+    },
+    {
+      name: "Savings",
+      amount: audit.savings,
+    },
+  ];
+
+  // SAVE REPORT
+  const saveLead = async () => {
+
+    if (!email) {
+
+      alert("Please enter email");
+
+      return false;
+    }
+
+    setLoading(true);
+
+    const { error } = await supabase
+      .from("leads")
+      .insert([
+        {
+          email,
+          company,
+          role,
+          tool,
+          plan,
+          savings: audit.yearlySavings,
+        },
+      ]);
+
+    if (error) {
+
+      console.log(error);
+
+      alert("Failed to save report");
+
+      setLoading(false);
+
+      return false;
+    }
+
+    return true;
+  };
+
+  // DOWNLOAD PDF
+  const downloadPDF = async () => {
+
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    pdf.setFontSize(24);
+
+    pdf.text("AI Spend Audit Report", 20, 20);
+
+    pdf.setFontSize(14);
+
+    pdf.text(`AI Tool: ${tool}`, 20, 40);
+
+    pdf.text(`Plan: ${plan}`, 20, 50);
+
+    pdf.text(`Monthly Spend: $${currentSpend}`, 20, 60);
+
+    pdf.text(
+      `Recommended Plan: ${audit.recommendedPlan}`,
+      20,
+      70
+    );
+
+    pdf.text(
+      `Recommended Spend: $${audit.recommendedSpend}`,
+      20,
+      80
+    );
+
+    pdf.text(
+      `Monthly Savings: $${audit.savings}`,
+      20,
+      90
+    );
+
+    pdf.text(
+      `Yearly Savings: $${audit.yearlySavings}`,
+      20,
+      100
+    );
+
+    pdf.text("Recommendation:", 20, 120);
+
+    const splitText = pdf.splitTextToSize(
+      audit.reason,
+      170
+    );
+
+    pdf.text(splitText, 20, 130);
+
+    pdf.save("AI-Spend-Audit-Report.pdf");
+  };
+
+  // HANDLE DOWNLOAD
+const handleDownload = async () => {
+
+  if (!email) {
+
+    alert("Please enter email");
+
+    return;
+  }
+
+  setLoading(true);
+
+  // DOWNLOAD PDF FIRST
+  await downloadPDF();
+
+  // SAVE TO DATABASE
+  await supabase
+    .from("leads")
+    .insert([
+      {
+        email,
+        company,
+        role,
+        tool,
+        plan,
+        savings: audit.yearlySavings,
+      },
+    ]);
+
+  setLoading(false);
+
+  alert("Report Downloaded!");
+
+  setEmail("");
+  setCompany("");
+  setRole("");
+};
+
   return (
 
     <main className="min-h-screen bg-black text-white px-6 py-10">
 
-      {/* Header */}
+      {/* HEADER */}
       <h1 className="text-5xl font-bold text-center">
         Your AI Savings Report
       </h1>
@@ -55,12 +214,14 @@ export default function ResultPage() {
         Personalized audit analysis for your AI stack.
       </p>
 
-      {/* Main Report */}
-      <div className="max-w-4xl mx-auto mt-12 bg-gray-900 p-8 rounded-2xl border border-gray-700">
+      {/* REPORT */}
+      <div
+        className="max-w-4xl mx-auto mt-12 bg-gray-900 p-8 rounded-2xl border border-gray-700"
+      >
 
         <div className="grid md:grid-cols-2 gap-6">
 
-          {/* Audit Summary */}
+          {/* SUMMARY */}
           <div className="bg-black p-6 rounded-xl border border-gray-700">
 
             <h2 className="text-2xl font-semibold mb-4">
@@ -108,7 +269,7 @@ export default function ResultPage() {
 
           </div>
 
-          {/* Savings Breakdown */}
+          {/* SAVINGS */}
           <div className="bg-black p-6 rounded-xl border border-gray-700">
 
             <h2 className="text-2xl font-semibold mb-4">
@@ -158,7 +319,7 @@ export default function ResultPage() {
 
         </div>
 
-        {/* Recommendation */}
+        {/* RECOMMENDATION */}
         <div className="mt-8 bg-black p-6 rounded-xl border border-gray-700">
 
           <h2 className="text-2xl font-semibold mb-4">
@@ -171,8 +332,8 @@ export default function ResultPage() {
 
         </div>
 
-        {/* Savings Hero Card */}
-        <div className="mt-8 bg-gradient-to-r from-green-500 to-emerald-700 p-6 rounded-2xl text-black">
+        {/* CARD */}
+        <div className="mt-8 bg-green-500 p-6 rounded-2xl text-black">
 
           <h2 className="text-3xl font-bold">
             Estimated Annual Savings
@@ -184,9 +345,41 @@ export default function ResultPage() {
 
         </div>
 
+        {/* CHART */}
+        <div className="mt-10 bg-black p-6 rounded-2xl border border-gray-700">
+
+          <h2 className="text-2xl font-bold mb-6">
+            Savings Visualization
+          </h2>
+
+          <div className="h-80">
+
+            <ResponsiveContainer width="100%" height="100%">
+
+              <BarChart data={chartData}>
+
+                <XAxis dataKey="name" />
+
+                <YAxis />
+
+                <Tooltip />
+
+                <Bar
+                  dataKey="amount"
+                  fill="#22c55e"
+                />
+
+              </BarChart>
+
+            </ResponsiveContainer>
+
+          </div>
+
+        </div>
+
       </div>
 
-      {/* Lead Capture Form */}
+      {/* FORM */}
       <div className="max-w-4xl mx-auto mt-10 bg-gray-900 p-8 rounded-2xl border border-gray-700">
 
         <h2 className="text-3xl font-bold mb-4">
@@ -194,12 +387,12 @@ export default function ResultPage() {
         </h2>
 
         <p className="text-gray-400 mb-8">
-          Receive your complete AI optimization report and future savings recommendations.
+          Receive your complete AI optimization report.
         </p>
 
         <div className="grid md:grid-cols-2 gap-6">
 
-          {/* Email */}
+          {/* EMAIL */}
           <div>
 
             <label className="block mb-2">
@@ -216,7 +409,7 @@ export default function ResultPage() {
 
           </div>
 
-          {/* Company */}
+          {/* COMPANY */}
           <div>
 
             <label className="block mb-2">
@@ -233,7 +426,7 @@ export default function ResultPage() {
 
           </div>
 
-          {/* Role */}
+          {/* ROLE */}
           <div>
 
             <label className="block mb-2">
@@ -252,12 +445,16 @@ export default function ResultPage() {
 
         </div>
 
-        {/* Button */}
+        {/* BUTTON */}
         <button
+          onClick={handleDownload}
+          disabled={loading}
           className="mt-8 w-full bg-green-500 hover:bg-green-400 transition text-black font-bold py-4 rounded-xl"
         >
 
-          Download Full Report
+          {loading
+            ? "Generating PDF..."
+            : "Download Full Report"}
 
         </button>
 
