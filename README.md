@@ -85,6 +85,40 @@ npm run test
 
 ---
 
+# Screenshots
+
+## Home Page
+
+![Home Page](./public/screenshots/home.png)
+
+---
+
+## Audit Form
+
+![Audit Form](./public/screenshots/form.png)
+
+---
+
+## Result Page
+
+![Result Page](./public/screenshots/result.png)
+
+---
+
+## Savings Chart
+
+![Savings Chart](./public/screenshots/chart.png)
+
+---
+
+## AI Summary
+
+![AI Summary](./public/screenshots/summary.png)
+
+## Sharable Link
+
+![Sharable Link](./public/screenshots/Sharable Link.png)
+
 # Deployment
 
 Deployed on Vercel.
