@@ -1,8 +1,8 @@
 # AI Spend Audit
 
-AI Spend Audit is a free SaaS-style web application that helps startups and engineering teams analyze their AI tooling costs and discover potential savings opportunities.
+AI Spend Audit is a SaaS-style web application that helps startups and engineering teams analyze AI tooling costs and identify potential savings opportunities.
 
-The platform evaluates tools like ChatGPT, Claude, Cursor, GitHub Copilot, Gemini, and others to recommend more cost-efficient plans and alternatives.
+The platform evaluates tools like ChatGPT, Claude, Cursor, GitHub Copilot, and Gemini to recommend more cost-efficient plans and alternatives.
 
 ---
 
@@ -16,7 +16,7 @@ https://ai-spend-audit-dkro8dbul-dharshinijegans-projects.vercel.app
 
 - AI spend audit engine
 - Savings calculation
-- Personalized AI-generated summary
+- Personalized AI-generated summaries
 - Shareable audit URLs
 - Supabase backend integration
 - PDF report export
@@ -38,50 +38,7 @@ https://ai-spend-audit-dkro8dbul-dharshinijegans-projects.vercel.app
 - Recharts
 - jsPDF
 - Vitest
-
----
-
-# Screenshots
-
-Add screenshots here after taking them from your app.
-
-Example:
-
-![Home Page](./screenshots/home.png)
-
----
-
-# Local Development
-
-## Install dependencies
-
-```bash
-npm install
-```
-
-## Run locally
-
-```bash
-npm run dev
-```
-
----
-
-# Run Tests
-
-```bash
-npm run test
-```
-
----
-
-# Architecture Decisions
-
-- Used Next.js App Router for modern routing and deployment support
-- Used Supabase for simple backend and database management
-- Used TypeScript for better maintainability
-- Used hardcoded audit logic instead of AI for financial consistency
-- Used OpenAI only for personalized summaries
+- Vercel
 
 ---
 
@@ -115,9 +72,53 @@ npm run test
 
 ![AI Summary](./public/screenshots/summary.png)
 
-## Sharable Link
+---
 
-![Sharable Link](./public/screenshots/Sharable Link.png)
+## Shareable Link
+
+![Shareable Link](./public/screenshots/shareable-link.png)
+
+---
+
+# Local Development
+
+## Install Dependencies
+
+```bash
+npm install
+```
+
+## Run Development Server
+
+```bash
+npm run dev
+```
+
+Open:
+
+```txt
+http://localhost:3000
+```
+
+---
+
+# Run Tests
+
+```bash
+npm run test
+```
+
+---
+
+# Architecture Decisions
+
+- Used Next.js App Router for modern routing and deployment support
+- Used Supabase for backend database management
+- Used TypeScript for maintainability and type safety
+- Used deterministic audit logic for explainable financial recommendations
+- Used OpenAI only for personalized summaries
+
+---
 
 # Deployment
 
